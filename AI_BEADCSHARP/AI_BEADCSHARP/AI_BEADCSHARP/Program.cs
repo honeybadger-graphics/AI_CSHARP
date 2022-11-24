@@ -1,14 +1,10 @@
-﻿#define TEST
-#define NOWORSE
+﻿#define NOTEST
+#define WORSE
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-/*
- TODO:
-    -Check if making it a another tread makes a difference?
- */
 namespace AI_BEADCSHARP
 {
 
@@ -21,11 +17,9 @@ namespace AI_BEADCSHARP
             int machines =  10;
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            SimulationWithParams(seed, jobs, machines); //TEST EVERYTHING
-            #region Machines5
-            //TEST first
-            /*seed = 312;
-            machines = 5;
+            SimulationWithParams(seed, jobs, machines); //Testing porp. 
+            #region Machines5  
+            /*machines = 5;
             jobs = 10;
             SimulationWithParams(seed, jobs, machines); 
             jobs = 20;
@@ -40,9 +34,7 @@ namespace AI_BEADCSHARP
             SimulationWithParams(seed, jobs, machines);*/
             #endregion
             #region Machines10
-            // TEST Second
-            /*seed = 132;
-            machines = 10;
+            /*machines = 10;
             jobs = 10;
             SimulationWithParams(seed, jobs, machines);
             jobs = 20;
@@ -57,8 +49,7 @@ namespace AI_BEADCSHARP
             SimulationWithParams(seed, jobs, machines);*/
             #endregion
             #region Machines20
-           // TEST Third
-            /*seed = 213;
+           /*
             machines = 20;
             jobs = 10;
             SimulationWithParams(seed, jobs, machines);
@@ -71,17 +62,14 @@ namespace AI_BEADCSHARP
             jobs = 200;
             SimulationWithParams(seed, jobs, machines);
             jobs = 500;
-            SimulationWithParams(seed, jobs, machines); */
+            SimulationWithParams(seed, jobs, machines);*/
             #endregion
             stopwatch.Stop();
             Console.WriteLine("Elapsed Time for the whole simulation: {0} seconds.",stopwatch.Elapsed.Seconds);
         }
 
         private static void SimulationWithParams(int seed, int jobs, int machines)
-        {
-            int Iteration = 10000000;
-            int Cmax = 0;                                       
-            double CmaxBest = Double.PositiveInfinity;           
+        {           
             List<int> jobOrder = new List<int>();           
             int[,] timesTable;                                     
             List<int> jobOrderBest = new List<int>();               
@@ -90,60 +78,68 @@ namespace AI_BEADCSHARP
             GenerateTimesTable(timesTable, seed);
             jobEndingArrayBest = new int[machines, jobs];
             SearchBestWithCooling(jobs,machines,timesTable, jobOrder, jobOrderBest,
-                jobEndingArrayBest,Iteration,Cmax,CmaxBest);
+                jobEndingArrayBest);
             
         }
 
-        private static void SearchBestWithCooling(int jobs,int machines, int[,] timesTable, List<int> jobOrder,List<int> jobOrderBest, int[,] jobEndingArrayBest, int iteration, int cmax, double cmaxBest)
+        private static void SearchBestWithCooling(int jobs,int machines, int[,] timesTable, List<int> jobOrder,List<int> jobOrderBest, int[,] jobEndingArrayBest)
         {
             const double BoltzmannConst = 1.380649;
             int[,] jobEndingArray;
-            double temp = 10000;
-            double Ptemp;
+            double temp = 100000;
             double possibility;
-            double epsilon = 0.001;
-            int i = 1;
-            /*Ptemp = Math.Exp(-((176 - 171) / (BoltzmannConst * temp)));
-            Console.WriteLine(Ptemp);*/
+            double epsilon = 0.0001;
+            int cmax = 0;
+            double Ptemp;
+            double cmaxBest = Double.PositiveInfinity;
             Random random = new Random((int)BoltzmannConst);
-            while (i < iteration && temp > epsilon)
+            while ( temp > epsilon)
             {
-                i++;
-
                 jobEndingArray = new int[machines, jobs];
                 RandomizeJobOrder(jobOrder, jobs);
                 CalculateEndTimes(machines, jobOrder, jobEndingArray, timesTable);
                 cmax = GetCMax(jobEndingArray, jobs, machines);
-                Ptemp = Math.Exp(-((cmaxBest - cmax) / (BoltzmannConst * temp)));
+                Ptemp = Math.Exp(((cmaxBest - cmax) / (BoltzmannConst * temp)));
                 if (cmax < cmaxBest)
                 {
+#if TEST
+                    Console.WriteLine("CmaxBest: {0} Cmax: {1} Cmax-CMaxBest: {2} Temp: {3}", cmaxBest, cmax, (cmax - cmaxBest), temp); 
+#endif
                     cmaxBest = cmax;
                     jobEndingArrayBest = jobEndingArray;
                     jobOrderBest = jobOrder.ToList();
-#if TEST
-                    Console.WriteLine(temp);
-#endif
                 }
-                //mi megy itt felre?
 #if WORSE
                 else
                 {
-                    Console.WriteLine(temp + "else");
                     possibility = random.NextDouble();
-                    if (possibility < Math.Exp(-((cmaxBest - cmax) / (BoltzmannConst * temp))))
+                    if (possibility < Ptemp)
                     {
                         cmaxBest = cmax;
                         jobEndingArrayBest = jobEndingArray;
                         jobOrderBest = jobOrder.ToList();
-#if TEST
-                        Console.WriteLine(temp + " choosing a worse thing cos possibility.");
-#endif
+
                     }
+#if TEST
+                    Console.WriteLine("CmaxBest: {0} Cmax: {1} Cmax-CMaxBest: {2} Temp: {3}", cmaxBest, cmax, (cmax - cmaxBest), temp + " after else"); 
+#endif
                 }
 #endif
                 temp *= 0.999;
             }
-            WriteOutBest(cmaxBest, timesTable, jobEndingArrayBest, jobOrderBest);
+            if (jobs>50 || machines > 10)
+            {
+                Console.WriteLine("Temperature cooled down.");
+                Console.WriteLine("There is too many jobs or machines to write it out all data.");
+                Console.WriteLine(PrintJobOrder(jobOrderBest));
+                Console.WriteLine("CmaxBest: {0}",cmaxBest);
+
+            }
+            else
+            {
+                Console.WriteLine("Temperature cooled down.");
+                WriteOutBest(cmaxBest, timesTable, jobEndingArrayBest, jobOrderBest);
+            }
 
         }
 
