@@ -1,5 +1,6 @@
 ﻿#define NOTEST
 #define WORSE
+#define NOREGION
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,15 +14,16 @@ namespace AI_BEADCSHARP
         static void Main(string[] args)
         {
             int seed = 123;
-            int jobs = 20;
-            int machines =  10;
+            int jobs = 500;
+            int machines =  20;
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            SimulationWithParams(seed, jobs, machines); //Testing porp. 
+            SimulationWithParams(seed, jobs, machines);
+#if REGION
             #region Machines5  
-            /*machines = 5;
+            machines = 5;
             jobs = 10;
-            SimulationWithParams(seed, jobs, machines); 
+            SimulationWithParams(seed, jobs, machines);
             jobs = 20;
             SimulationWithParams(seed, jobs, machines);
             jobs = 50;
@@ -31,10 +33,10 @@ namespace AI_BEADCSHARP
             jobs = 200;
             SimulationWithParams(seed, jobs, machines);
             jobs = 500;
-            SimulationWithParams(seed, jobs, machines);*/
+            SimulationWithParams(seed, jobs, machines);
             #endregion
             #region Machines10
-            /*machines = 10;
+            machines = 10;
             jobs = 10;
             SimulationWithParams(seed, jobs, machines);
             jobs = 20;
@@ -46,10 +48,9 @@ namespace AI_BEADCSHARP
             jobs = 200;
             SimulationWithParams(seed, jobs, machines);
             jobs = 500;
-            SimulationWithParams(seed, jobs, machines);*/
+            SimulationWithParams(seed, jobs, machines);
             #endregion
             #region Machines20
-           /*
             machines = 20;
             jobs = 10;
             SimulationWithParams(seed, jobs, machines);
@@ -62,8 +63,9 @@ namespace AI_BEADCSHARP
             jobs = 200;
             SimulationWithParams(seed, jobs, machines);
             jobs = 500;
-            SimulationWithParams(seed, jobs, machines);*/
-            #endregion
+            SimulationWithParams(seed, jobs, machines);
+            #endregion  
+#endif
             stopwatch.Stop();
             Console.WriteLine("Elapsed Time for the whole simulation: {0} seconds.",stopwatch.Elapsed.Seconds);
         }
@@ -127,7 +129,7 @@ namespace AI_BEADCSHARP
 #endif
                 temp *= 0.999;
             }
-            if (jobs>50 || machines > 10)
+            if (jobs>20 || machines > 10)
             {
                 Console.WriteLine("Temperature cooled down.");
                 Console.WriteLine("There is too many jobs or machines to write it out all data.");
