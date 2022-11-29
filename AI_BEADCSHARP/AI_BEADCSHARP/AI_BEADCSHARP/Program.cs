@@ -1,5 +1,4 @@
-﻿#define NOTEST
-#define WORSE
+﻿
 #define NOREGION
 using System;
 using System.Collections.Generic;
@@ -14,12 +13,14 @@ namespace AI_BEADCSHARP
         static void Main(string[] args)
         {
             int seed = 123;
-            int jobs = 500;
-            int machines =  20;
+            int jobs = 10;
+            int machines =  10;
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             SimulationWithParams(seed, jobs, machines);
 #if REGION
+            //Change define to REGION to run this part
+            //Not recommended for slower PC-s
             #region Machines5  
             machines = 5;
             jobs = 10;
@@ -104,14 +105,14 @@ namespace AI_BEADCSHARP
                 Ptemp = Math.Exp(((cmaxBest - cmax) / (BoltzmannConst * temp)));
                 if (cmax < cmaxBest)
                 {
-#if TEST
-                    Console.WriteLine("CmaxBest: {0} Cmax: {1} Cmax-CMaxBest: {2} Temp: {3}", cmaxBest, cmax, (cmax - cmaxBest), temp); 
-#endif
+                    //Uncomment the line below to see results while running.
+                    //Console.WriteLine("CmaxBest: {0} Cmax: {1} Cmax-CMaxBest: {2} Temp: {3}", cmaxBest, cmax, (cmax - cmaxBest), temp); 
+
                     cmaxBest = cmax;
                     jobEndingArrayBest = jobEndingArray;
                     jobOrderBest = jobOrder.ToList();
                 }
-#if WORSE
+
                 else
                 {
                     possibility = random.NextDouble();
@@ -122,11 +123,11 @@ namespace AI_BEADCSHARP
                         jobOrderBest = jobOrder.ToList();
 
                     }
-#if TEST
-                    Console.WriteLine("CmaxBest: {0} Cmax: {1} Cmax-CMaxBest: {2} Temp: {3}", cmaxBest, cmax, (cmax - cmaxBest), temp + " after else"); 
-#endif
+                    //Uncomment the line below to see results while running. (as above)
+                    //Console.WriteLine("CmaxBest: {0} Cmax: {1} Cmax-CMaxBest: {2} Temp: {3}", cmaxBest, cmax, (cmax - cmaxBest), temp + " after else"); 
+
                 }
-#endif
+
                 temp *= 0.999;
             }
             if (jobs>20 || machines > 10)
